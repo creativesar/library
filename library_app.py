@@ -1,202 +1,86 @@
 import json
 import streamlit as st
 from typing import List, Dict, Any
+import pandas as pd
 from datetime import datetime
 import plotly.express as px
-import pandas as pd
+import plotly.graph_objects as go
+import random
 
-# Custom styling
-st.set_page_config(page_title="Modern Library Manager", layout="wide", initial_sidebar_state="expanded")
+# Set page configuration
+st.set_page_config(
+    page_title="Modern Library Manager",
+    page_icon="📚",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
-# Apply custom CSS for a modern, trendy look
+# Apply custom CSS
 st.markdown("""
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-    
-    * {
-        font-family: 'Poppins', sans-serif;
-    }
-    
-    .stApp {
-        max-width: 1200px;
-        margin: 0 auto;
-        background-color: #f8f9fa;
-    }
-    
+<style>
     .main-header {
-        background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
-        padding: 2rem;
-        border-radius: 20px;
-        margin-bottom: 2rem;
-        color: white;
-        text-align: center;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    }
-    
-    .book-card {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 16px;
-        margin: 1rem 0;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        transition: all 0.3s ease;
-        border-left: 5px solid #6366F1;
-    }
-    
-    .book-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
-    }
-    
-    .stats-card {
-        background: white;
-        padding: 2rem;
-        border-radius: 16px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        margin-bottom: 1.5rem;
-        border-top: 5px solid #8B5CF6;
-    }
-    
-    .sidebar .stSelectbox {
-        background-color: white;
-        border-radius: 10px;
-    }
-    
-    .stButton button {
-        background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
-        color: white;
-        border: none;
-        border-radius: 10px;
-        padding: 0.6rem 1.2rem;
-        font-weight: 500;
-        transition: all 0.3s ease;
-    }
-    
-    .stButton button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(107, 114, 128, 0.25);
-    }
-    
-    .stTextInput input, .stNumberInput input, .stSelectbox, .stMultiselect {
-        border-radius: 10px;
-        border: 1px solid #e5e7eb;
-    }
-    
-    .metric-card {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 16px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        text-align: center;
-    }
-    
-    .metric-value {
         font-size: 2.5rem;
-        font-weight: 700;
-        color: #6366F1;
-    }
-    
-    .metric-label {
-        font-size: 1rem;
-        color: #6B7280;
-        margin-top: 0.5rem;
-    }
-    
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 1rem;
-    }
-    
-    .stTabs [data-baseweb="tab"] {
-        background-color: white;
-        border-radius: 10px;
-        padding: 0.5rem 1rem;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    }
-    
-    .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
-        color: white;
-    }
-    
-    div.stSlider > div[data-baseweb="slider"] > div > div {
-        background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
-    }
-    
-    div.stSlider > div[data-baseweb="slider"] > div > div[role="slider"] {
-        background-color: white;
-        border: 2px solid #6366F1;
-    }
-    
-    /* Additional trendy styles */
-    .empty-library {
+        color: #1E88E5;
         text-align: center;
-        padding: 4rem 0;
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1rem;
     }
-    
-    .empty-library img {
-        width: 150px;
-        opacity: 0.7;
+    .subheader {
+        font-size: 1.8rem;
+        color: #0D47A1;
+        margin-bottom: 1rem;
     }
-    
-    .empty-library p {
-        margin-top: 1rem;
+    .card {
+        border-radius: 10px;
+        padding: 1.5rem;
+        background-color: #f8f9fa;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1rem;
+    }
+    .book-card {
+        border-left: 5px solid #1E88E5;
+        padding: 1rem;
+        background-color: white;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        margin-bottom: 0.8rem;
+    }
+    .book-title {
         font-size: 1.2rem;
-        color: #6B7280;
+        font-weight: bold;
+        color: #0D47A1;
     }
-    
-    /* Animated elements */
-    @keyframes float {
-        0% { transform: translateY(0px); }
-        50% { transform: translateY(-10px); }
-        100% { transform: translateY(0px); }
+    .book-author {
+        font-size: 1rem;
+        color: #424242;
     }
-    
-    .float-animation {
-        animation: float 3s ease-in-out infinite;
+    .book-meta {
+        font-size: 0.9rem;
+        color: #757575;
     }
-    
-    /* Badge styles */
-    .badge {
-        display: inline-block;
-        padding: 0.25rem 0.5rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 500;
-        margin-right: 0.5rem;
+    .read-badge {
+        background-color: #4CAF50;
+        color: white;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
     }
-    
-    .badge-read {
-        background-color: #10B981;
+    .unread-badge {
+        background-color: #FFC107;
+        color: #212121;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+    }
+    .sidebar .css-1d391kg {
+        padding: 2rem 1rem;
+    }
+    .stButton>button {
+        width: 100%;
+        border-radius: 5px;
+        background-color: #1E88E5;
         color: white;
     }
-    
-    .badge-unread {
-        background-color: #F59E0B;
-        color: white;
-    }
-    
-    /* Custom scrollbar */
-    ::-webkit-scrollbar {
-        width: 8px;
-    }
-    
-    ::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 10px;
-    }
-    
-    ::-webkit-scrollbar-thumb {
-        background: #c7d2fe;
-        border-radius: 10px;
-    }
-    
-    ::-webkit-scrollbar-thumb:hover {
-        background: #6366F1;
-    }
-    </style>
+</style>
 """, unsafe_allow_html=True)
 
 class LibraryManager:
@@ -204,8 +88,10 @@ class LibraryManager:
         self.books = []
         self.load_library()
 
-    def add_book(self, title: str, author: str, year: int, genre: str, read: bool, 
-                 rating: int = 0, cover_url: str = "", tags: List[str] = None) -> None:
+    def add_book(self, title: str, author: str, year: int, genre: str, read: bool, rating: int = 0, date_added: str = None) -> None:
+        if not date_added:
+            date_added = datetime.now().strftime("%Y-%m-%d")
+            
         book = {
             'title': title,
             'author': author,
@@ -213,10 +99,7 @@ class LibraryManager:
             'genre': genre,
             'read': read,
             'rating': rating,
-            'cover_url': cover_url,
-            'tags': tags or [],
-            'date_added': datetime.now().isoformat(),
-            'last_modified': datetime.now().isoformat()
+            'date_added': date_added
         }
         self.books.append(book)
         self.save_library()
@@ -229,27 +112,14 @@ class LibraryManager:
                 return True
         return False
 
-    def search_books(self, query: str, filters: Dict = None) -> List[Dict[str, Any]]:
-        results = self.books
-        
-        if filters:
-            if filters.get('genre'):
-                results = [b for b in results if b['genre'] == filters['genre']]
-            if filters.get('year_from'):
-                results = [b for b in results if b['year'] >= filters['year_from']]
-            if filters.get('year_to'):
-                results = [b for b in results if b['year'] <= filters['year_to']]
-            if filters.get('rating'):
-                results = [b for b in results if b['rating'] >= filters['rating']]
+    def search_books(self, query: str) -> List[Dict[str, Any]]:
+        query = query.lower()
+        return [book for book in self.books if 
+                query in book['title'].lower() or 
+                query in book['author'].lower()]
 
-        if query:
-            query = query.lower()
-            results = [b for b in results if 
-                      query in b['title'].lower() or 
-                      query in b['author'].lower() or
-                      query in ' '.join(b['tags']).lower()]
-        
-        return results
+    def get_all_books(self) -> List[Dict[str, Any]]:
+        return self.books
 
     def get_statistics(self) -> Dict[str, Any]:
         total_books = len(self.books)
@@ -259,19 +129,28 @@ class LibraryManager:
         # Get genre distribution
         genres = {}
         for book in self.books:
-            genres[book['genre']] = genres.get(book['genre'], 0) + 1
-
-        # Get rating distribution
-        ratings = {}
+            genre = book['genre']
+            if genre in genres:
+                genres[genre] += 1
+            else:
+                genres[genre] = 1
+                
+        # Get author distribution (top 5)
+        authors = {}
         for book in self.books:
-            ratings[book['rating']] = ratings.get(book['rating'], 0) + 1
+            author = book['author']
+            if author in authors:
+                authors[author] += 1
+            else:
+                authors[author] = 1
+        top_authors = dict(sorted(authors.items(), key=lambda x: x[1], reverse=True)[:5])
         
         return {
             'total_books': total_books,
             'read_books': read_books,
             'percent_read': round(percent_read, 2),
             'genres': genres,
-            'ratings': ratings
+            'top_authors': top_authors
         }
 
     def save_library(self) -> None:
@@ -285,215 +164,301 @@ class LibraryManager:
         except FileNotFoundError:
             self.books = []
 
-    def get_all_books(self) -> List[Dict[str, Any]]:
-        return self.books
-
 def main():
-    # Create a modern header
-    st.markdown('<div class="main-header">', unsafe_allow_html=True)
-    st.title("📚 Bookshelf")
-    st.markdown('<p style="font-size: 1.2rem; opacity: 0.8;">Your Personal Library Manager</p>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    # Custom header with HTML
+    st.markdown('<h1 class="main-header">📚 Modern Library Manager</h1>', unsafe_allow_html=True)
 
     if 'library_manager' not in st.session_state:
         st.session_state.library_manager = LibraryManager()
 
-    # Create a modern sidebar
+    # Sidebar with gradient background
     with st.sidebar:
-        st.markdown('<h3 style="margin-bottom: 20px;">📑 Navigation</h3>', unsafe_allow_html=True)
+        st.markdown("""
+        <div style="text-align: center; margin-bottom: 20px;">
+            <h2 style="color: #1E88E5;">Navigation</h2>
+        </div>
+        """, unsafe_allow_html=True)
+        
         menu = st.selectbox(
-            "",
-            ["📖 Add Book", "🔍 Search Books", "📚 My Collection", "📊 Statistics", "🗑️ Manage Books"]
+            "Choose an option",
+            ["📕 Add Book", "🗑️ Remove Book", "🔍 Search Books", "📚 My Library", "📊 Statistics & Analytics"]
         )
 
-    if menu == "📖 Add Book":
-        st.markdown('<h2 style="margin-bottom: 20px;">📖 Add New Book</h2>', unsafe_allow_html=True)
+    if "📕 Add Book" in menu:
+        st.markdown('<h2 class="subheader">Add a New Book</h2>', unsafe_allow_html=True)
         
-        with st.form("add_book_form", clear_on_submit=True):
-            col1, col2 = st.columns(2)
-            with col1:
-                title = st.text_input("📕 Title")
-                author = st.text_input("✍️ Author")
-                year = st.number_input("📅 Publication Year", min_value=1000, max_value=2023, value=2023)
-                genre = st.selectbox("📚 Genre", ["Fiction", "Non-Fiction", "Science", "Technology", "History", "Biography", "Fantasy", "Mystery", "Romance", "Thriller", "Other"])
-            
-            with col2:
-                cover_url = st.text_input("🖼️ Cover Image URL (optional)")
-                rating = st.slider("⭐ Rating", 0, 5, 0)
-                tags = st.multiselect("🏷️ Tags", ["Classic", "Bestseller", "Academic", "Self-Help", "Reference", "Novel", "Award-Winner", "Series", "Young Adult", "Children"])
-                read = st.checkbox("📖 Have you read this book?")
-            
-            submit = st.form_submit_button("Add to My Collection", use_container_width=True)
-            if submit:
-                if title and author:
-                    st.session_state.library_manager.add_book(
-                        title, author, year, genre, read, rating, cover_url, tags
-                    )
-                    st.success(f"✅ Added: {title} by {author}")
-                else:
-                    st.error("❌ Title and Author are required!")
-
-    elif menu == "🔍 Search Books":
-        st.markdown('<h2 style="margin-bottom: 20px;">🔍 Find Books</h2>', unsafe_allow_html=True)
-        
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            query = st.text_input("🔎 Search by title, author, or tags")
-        with col2:
-            genre_filter = st.selectbox("📚 Filter by Genre", ["All"] + list(set(b['genre'] for b in st.session_state.library_manager.get_all_books())))
-        with col3:
-            rating_filter = st.slider("⭐ Minimum Rating", 0, 5, 0)
-
-        filters = {
-            'genre': genre_filter if genre_filter != "All" else None,
-            'rating': rating_filter
-        }
-
-        results = st.session_state.library_manager.search_books(query, filters)
-        
-        if not results:
-            st.info("📚 No books found matching your search criteria.")
-        
-        for book in results:
-            with st.container():
-                st.markdown(f'<div class="book-card">', unsafe_allow_html=True)
-                col1, col2 = st.columns([1, 3])
-                with col1:
-                    if book['cover_url']:
-                        st.image(book['cover_url'], width=150)
-                    else:
-                        st.image("https://via.placeholder.com/150x200?text=No+Cover", width=150)
-                with col2:
-                    st.markdown(f"### {book['title']}")
-                    st.markdown(f"**Author:** {book['author']}")
-                    st.markdown(f"**Year:** {book['year']} | **Genre:** {book['genre']}")
-                    st.markdown(f"**Rating:** {'⭐' * book['rating']}")
-                    st.markdown(f"**Tags:** {', '.join(book['tags']) if book['tags'] else 'None'}")
-                    st.markdown(f"**Status:** {'📖 Read' if book['read'] else '📕 Unread'}")
-                st.markdown('</div>', unsafe_allow_html=True)
-
-    elif menu == "📊 Statistics":
-        st.markdown('<h2 style="margin-bottom: 20px;">📊 Library Insights</h2>', unsafe_allow_html=True)
-        stats = st.session_state.library_manager.get_statistics()
-        
-        # Modern metrics display
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-            st.markdown(f'<div class="metric-value">{stats["total_books"]}</div>', unsafe_allow_html=True)
-            st.markdown('<div class="metric-label">Total Books</div>', unsafe_allow_html=True)
-            st.markdown('</div>', unsafe_allow_html=True)
-        with col2:
-            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-            st.markdown(f'<div class="metric-value">{stats["read_books"]}</div>', unsafe_allow_html=True)
-            st.markdown('<div class="metric-label">Books Read</div>', unsafe_allow_html=True)
-            st.markdown('</div>', unsafe_allow_html=True)
-        with col3:
-            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-            st.markdown(f'<div class="metric-value">{stats["percent_read"]}%</div>', unsafe_allow_html=True)
-            st.markdown('<div class="metric-label">Completion Rate</div>', unsafe_allow_html=True)
-            st.markdown('</div>', unsafe_allow_html=True)
-
-        st.markdown('<div style="height: 30px;"></div>', unsafe_allow_html=True)
-        
-        # Enhanced visualizations
         col1, col2 = st.columns(2)
         
         with col1:
-            st.markdown('<div class="stats-card">', unsafe_allow_html=True)
-            # Genre distribution
-            df_genres = pd.DataFrame(list(stats['genres'].items()), columns=['Genre', 'Count'])
-            fig_genres = px.pie(df_genres, values='Count', names='Genre', title='Books by Genre',
-                               color_discrete_sequence=px.colors.sequential.Agsunset)
-            fig_genres.update_traces(textposition='inside', textinfo='percent+label')
-            fig_genres.update_layout(
-                title_font_size=20,
-                legend_title_font_size=16,
-                legend_font_size=14
-            )
-            st.plotly_chart(fig_genres, use_container_width=True)
+            st.markdown('<div class="card">', unsafe_allow_html=True)
+            with st.form("add_book_form"):
+                title = st.text_input("Title")
+                author = st.text_input("Author")
+                col_year, col_genre = st.columns(2)
+                with col_year:
+                    year = st.number_input("Publication Year", min_value=1000, max_value=datetime.now().year, value=datetime.now().year)
+                with col_genre:
+                    genre = st.selectbox("Genre", ["Fiction", "Non-Fiction", "Science Fiction", "Fantasy", "Mystery", "Thriller", 
+                                                  "Romance", "Biography", "History", "Self-Help", "Other"])
+                
+                col_read, col_rating = st.columns(2)
+                with col_read:
+                    read = st.checkbox("Have you read this book?")
+                with col_rating:
+                    rating = st.slider("Rating", 0, 5, 0, help="Rate this book from 0 to 5 stars")
+                
+                if st.form_submit_button("Add to Library"):
+                    if title and author:
+                        st.session_state.library_manager.add_book(title, author, year, genre, read, rating)
+                        st.success(f"Added: {title} by {author}")
+                    else:
+                        st.error("Title and author are required!")
             st.markdown('</div>', unsafe_allow_html=True)
-        
+            
         with col2:
-            st.markdown('<div class="stats-card">', unsafe_allow_html=True)
-            # Rating distribution
-            df_ratings = pd.DataFrame(list(stats['ratings'].items()), columns=['Rating', 'Count'])
-            fig_ratings = px.bar(df_ratings, x='Rating', y='Count', title='Books by Rating',
-                                color='Count', color_continuous_scale='Agsunset')
-            fig_ratings.update_layout(
-                title_font_size=20,
-                xaxis_title_font_size=16,
-                yaxis_title_font_size=16
-            )
-            st.plotly_chart(fig_ratings, use_container_width=True)
+            st.markdown('<div class="card">', unsafe_allow_html=True)
+            st.markdown("### Book Preview")
+            if 'title' in locals() and title:
+                st.markdown(f"""
+                <div class="book-card">
+                    <div class="book-title">{title or "Title"}</div>
+                    <div class="book-author">by {author or "Author"}</div>
+                    <div class="book-meta">{genre or "Genre"} • {year or "Year"}</div>
+                    <div style="margin-top: 10px;">
+                        <span class="{'read-badge' if read else 'unread-badge'}">{
+                            "Read ✓" if read else "Not Read"}</span>
+                        <span style="margin-left: 10px;">{"⭐" * rating}</span>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.info("Fill in the form to see a preview of your book entry")
             st.markdown('</div>', unsafe_allow_html=True)
 
-    elif menu == "🗑️ Manage Books":
-        st.markdown('<h2 style="margin-bottom: 20px;">🗑️ Manage Books</h2>', unsafe_allow_html=True)
+    elif "🗑️ Remove Book" in menu:
+        st.markdown('<h2 class="subheader">Remove a Book</h2>', unsafe_allow_html=True)
+        st.markdown('<div class="card">', unsafe_allow_html=True)
         
-        title = st.text_input("Enter the title of the book to remove")
-        if st.button("Remove Book", use_container_width=True):
-            if st.session_state.library_manager.remove_book(title):
-                st.success(f"✅ Successfully removed: {title}")
-            else:
-                st.error("❌ Book not found in your collection!")
+        books = st.session_state.library_manager.get_all_books()
+        if books:
+            book_titles = [book['title'] for book in books]
+            title_to_remove = st.selectbox("Select a book to remove", book_titles)
+            
+            # Display the selected book details
+            selected_book = next((book for book in books if book['title'] == title_to_remove), None)
+            if selected_book:
+                st.markdown(f"""
+                <div class="book-card">
+                    <div class="book-title">{selected_book['title']}</div>
+                    <div class="book-author">by {selected_book['author']}</div>
+                    <div class="book-meta">{selected_book['genre']} • {selected_book['year']}</div>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            if st.button("Remove Selected Book"):
+                if st.session_state.library_manager.remove_book(title_to_remove):
+                    st.success(f"Removed: {title_to_remove}")
+                    st.experimental_rerun()
+                else:
+                    st.error("Book not found!")
+        else:
+            st.info("Your library is empty.")
+        st.markdown('</div>', unsafe_allow_html=True)
 
-    elif menu == "📚 My Collection":
-        st.markdown('<h2 style="margin-bottom: 20px;">📚 My Book Collection</h2>', unsafe_allow_html=True)
+    elif "🔍 Search Books" in menu:
+        st.markdown('<h2 class="subheader">Search Books</h2>', unsafe_allow_html=True)
+        st.markdown('<div class="card">', unsafe_allow_html=True)
+        
+        query = st.text_input("Search by title or author")
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            search_by_title = st.checkbox("Title", value=True)
+        with col2:
+            search_by_author = st.checkbox("Author", value=True)
+        with col3:
+            search_by_genre = st.checkbox("Genre", value=False)
+            
+        if query:
+            results = st.session_state.library_manager.search_books(query)
+            
+            # Filter based on checkboxes
+            filtered_results = []
+            for book in results:
+                if (search_by_title and query.lower() in book['title'].lower()) or \
+                   (search_by_author and query.lower() in book['author'].lower()) or \
+                   (search_by_genre and query.lower() in book['genre'].lower()):
+                    filtered_results.append(book)
+            
+            if filtered_results:
+                st.write(f"Found {len(filtered_results)} books matching '{query}'")
+                for book in filtered_results:
+                    st.markdown(f"""
+                    <div class="book-card">
+                        <div class="book-title">{book['title']}</div>
+                        <div class="book-author">by {book['author']}</div>
+                        <div class="book-meta">{book['genre']} • {book['year']}</div>
+                        <div style="margin-top: 10px;">
+                            <span class="{'read-badge' if book['read'] else 'unread-badge'}">{
+                                "Read ✓" if book['read'] else "Not Read"}</span>
+                            <span style="margin-left: 10px;">{"⭐" * book.get('rating', 0)}</span>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+            else:
+                st.info("No books found matching your search.")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    elif "📚 My Library" in menu:
+        st.markdown('<h2 class="subheader">My Library</h2>', unsafe_allow_html=True)
+        
         books = st.session_state.library_manager.get_all_books()
         
-        if not books:
-            st.info("📚 Your library is empty. Start by adding some books!")
-            st.markdown("""
-            <div style="text-align: center; padding: 3rem 0;">
-                <img src="https://cdn-icons-png.flaticon.com/512/2702/2702134.png" width="150">
-                <p style="margin-top: 1rem; font-size: 1.2rem;">Your bookshelf is waiting to be filled!</p>
-            </div>
-            """, unsafe_allow_html=True)
-        else:
+        if books:
             # Create tabs for different views
-            tab1, tab2 = st.tabs(["📚 Grid View", "📋 List View"])
+            tab1, tab2 = st.tabs(["Card View", "Table View"])
             
             with tab1:
-                # Grid view with 3 books per row
-                for i in range(0, len(books), 3):
-                    cols = st.columns(3)
-                    for j in range(3):
-                        if i+j < len(books):
-                            book = books[i+j]
-                            with cols[j]:
-                                st.markdown(f'<div class="book-card">', unsafe_allow_html=True)
-                                if book['cover_url']:
-                                    st.image(book['cover_url'], width=150)
-                                else:
-                                    st.image("https://via.placeholder.com/150x200?text=No+Cover", width=150)
-                                st.markdown(f"### {book['title']}")
-                                st.markdown(f"**Author:** {book['author']}")
-                                st.markdown(f"**Genre:** {book['genre']}")
-                                st.markdown(f"**Rating:** {'⭐' * book['rating']}")
-                                st.markdown(f"**Status:** {'📖 Read' if book['read'] else '📕 Unread'}")
-                                st.markdown('</div>', unsafe_allow_html=True)
+                # Card view with columns
+                cols = st.columns(3)
+                for i, book in enumerate(books):
+                    with cols[i % 3]:
+                        st.markdown(f"""
+                        <div class="book-card">
+                            <div class="book-title">{book['title']}</div>
+                            <div class="book-author">by {book['author']}</div>
+                            <div class="book-meta">{book['genre']} • {book['year']}</div>
+                            <div style="margin-top: 10px;">
+                                <span class="{'read-badge' if book['read'] else 'unread-badge'}">{
+                                    "Read ✓" if book['read'] else "Not Read"}</span>
+                                <span style="margin-left: 10px;">{"⭐" * book.get('rating', 0)}</span>
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
             
             with tab2:
-                # List view with more details
-                for book in books:
-                    with st.container():
-                        st.markdown(f'<div class="book-card">', unsafe_allow_html=True)
-                        col1, col2 = st.columns([1, 3])
-                        with col1:
-                            if book['cover_url']:
-                                st.image(book['cover_url'], width=150)
-                            else:
-                                st.image("https://via.placeholder.com/150x200?text=No+Cover", width=150)
-                        with col2:
-                            st.markdown(f"### {book['title']}")
-                            st.markdown(f"**Author:** {book['author']}")
-                            st.markdown(f"**Year:** {book['year']} | **Genre:** {book['genre']}")
-                            st.markdown(f"**Rating:** {'⭐' * book['rating']}")
-                            st.markdown(f"**Tags:** {', '.join(book['tags']) if book['tags'] else 'None'}")
-                            st.markdown(f"**Status:** {'📖 Read' if book['read'] else '📕 Unread'}")
-                            st.markdown(f"**Added on:** {book.get('date_added', 'Unknown').split('T')[0]}")
-                        st.markdown('</div>', unsafe_allow_html=True)
+                # Table view
+                df = pd.DataFrame(books)
+                if 'rating' not in df.columns:
+                    df['rating'] = 0
+                if 'date_added' not in df.columns:
+                    df['date_added'] = "Unknown"
+                
+                # Reorder columns
+                columns_order = ['title', 'author', 'year', 'genre', 'read', 'rating', 'date_added']
+                df = df[columns_order]
+                
+                # Rename columns
+                df.columns = ['Title', 'Author', 'Year', 'Genre', 'Read', 'Rating', 'Date Added']
+                
+                # Format the Read column
+                df['Read'] = df['Read'].map({True: "✅", False: "❌"})
+                
+                # Format the Rating column
+                df['Rating'] = df['Rating'].apply(lambda x: "⭐" * int(x))
+                
+                st.dataframe(df, use_container_width=True)
+        else:
+            st.info("Your library is empty. Add some books to get started!")
+
+    elif "📊 Statistics & Analytics" in menu:
+        st.markdown('<h2 class="subheader">Library Statistics & Analytics</h2>', unsafe_allow_html=True)
+        
+        stats = st.session_state.library_manager.get_statistics()
+        
+        # Top metrics
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.markdown('<div class="card" style="text-align: center;">', unsafe_allow_html=True)
+            st.metric("Total Books", stats['total_books'])
+            st.markdown('</div>', unsafe_allow_html=True)
+        with col2:
+            st.markdown('<div class="card" style="text-align: center;">', unsafe_allow_html=True)
+            st.metric("Read Books", stats['read_books'])
+            st.markdown('</div>', unsafe_allow_html=True)
+        with col3:
+            st.markdown('<div class="card" style="text-align: center;">', unsafe_allow_html=True)
+            st.metric("Percentage Read", f"{stats['percent_read']}%")
+            st.markdown('</div>', unsafe_allow_html=True)
+            
+        # Charts row
+        st.markdown('<h3 style="margin-top: 20px;">Reading Analytics</h3>', unsafe_allow_html=True)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown('<div class="card">', unsafe_allow_html=True)
+            # Reading status pie chart
+            fig = go.Figure(data=[go.Pie(
+                labels=['Read', 'Unread'],
+                values=[stats['read_books'], stats['total_books'] - stats['read_books']],
+                hole=.4,
+                marker_colors=['#4CAF50', '#FFC107']
+            )])
+            fig.update_layout(title_text="Reading Status", showlegend=True)
+            st.plotly_chart(fig, use_container_width=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+            
+        with col2:
+            st.markdown('<div class="card">', unsafe_allow_html=True)
+            # Genre distribution
+            if stats['genres']:
+                genres_df = pd.DataFrame({
+                    'Genre': list(stats['genres'].keys()),
+                    'Count': list(stats['genres'].values())
+                })
+                fig = px.bar(genres_df, x='Genre', y='Count', color='Count',
+                            color_continuous_scale='Blues')
+                fig.update_layout(title_text="Books by Genre")
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.info("Add books with genres to see this chart")
+            st.markdown('</div>', unsafe_allow_html=True)
+        
+        # Author analysis
+        st.markdown('<h3 style="margin-top: 20px;">Author Analysis</h3>', unsafe_allow_html=True)
+        st.markdown('<div class="card">', unsafe_allow_html=True)
+        
+        if stats['top_authors']:
+            authors_df = pd.DataFrame({
+                'Author': list(stats['top_authors'].keys()),
+                'Books': list(stats['top_authors'].values())
+            })
+            fig = px.bar(authors_df, x='Author', y='Books', color='Books',
+                        color_continuous_scale='Greens')
+            fig.update_layout(title_text="Top Authors in Your Library")
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("Add more books to see author statistics")
+            
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        # Reading timeline (if date_added exists)
+        books = st.session_state.library_manager.get_all_books()
+        if books and any('date_added' in book for book in books):
+            st.markdown('<h3 style="margin-top: 20px;">Reading Timeline</h3>', unsafe_allow_html=True)
+            st.markdown('<div class="card">', unsafe_allow_html=True)
+            
+            # Filter books with date_added
+            dated_books = [book for book in books if 'date_added' in book]
+            if dated_books:
+                # Create timeline dataframe
+                timeline_df = pd.DataFrame(dated_books)
+                timeline_df['date_added'] = pd.to_datetime(timeline_df['date_added'])
+                timeline_df = timeline_df.sort_values('date_added')
+                
+                # Create cumulative count
+                timeline_df['cumulative_count'] = range(1, len(timeline_df) + 1)
+                
+                # Plot timeline
+                fig = px.line(timeline_df, x='date_added', y='cumulative_count',
+                            labels={'date_added': 'Date', 'cumulative_count': 'Total Books'},
+                            title='Library Growth Over Time')
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.info("Books with dates will appear in this timeline")
+                
+            st.markdown('</div>', unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
