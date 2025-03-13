@@ -30,55 +30,104 @@ st.markdown("""
         margin-bottom: 1rem;
     }
     .card {
-        border-radius: 10px;
-        padding: 1.5rem;
-        background-color: #f8f9fa;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        margin-bottom: 1rem;
+        border-radius: 15px;
+        padding: 1.8rem;
+        background: linear-gradient(145deg, #ffffff, #f5f7fa);
+        box-shadow: 5px 5px 15px #d1d9e6, -5px -5px 15px #ffffff;
+        margin-bottom: 1.5rem;
+        transition: transform 0.2s ease;
     }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    
+    /* Enhanced Book Card */
     .book-card {
         border-left: 5px solid #1E88E5;
-        padding: 1rem;
-        background-color: white;
-        border-radius: 5px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        margin-bottom: 0.8rem;
+        padding: 1.2rem;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
     }
-    .book-title {
-        font-size: 1.2rem;
-        font-weight: bold;
-        color: #0D47A1;
+    .book-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
     }
-    .book-author {
-        font-size: 1rem;
-        color: #424242;
-    }
-    .book-meta {
-        font-size: 0.9rem;
-        color: #757575;
-    }
+    
+    /* Enhanced Badges */
     .read-badge {
-        background-color: #4CAF50;
+        background: linear-gradient(45deg, #4CAF50, #45a049);
         color: white;
-        padding: 0.2rem 0.5rem;
-        border-radius: 4px;
-        font-size: 0.8rem;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
     }
     .unread-badge {
-        background-color: #FFC107;
+        background: linear-gradient(45deg, #FFC107, #FFB300);
         color: #212121;
-        padding: 0.2rem 0.5rem;
-        border-radius: 4px;
-        font-size: 0.8rem;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
     }
-    .sidebar .css-1d391kg {
-        padding: 2rem 1rem;
+    
+    /* Enhanced Form Controls */
+    .stTextInput > div > div {
+        border-radius: 8px;
+        border: 2px solid #e0e0e0;
+        padding: 0.5rem;
     }
+    .stTextInput > div > div:focus-within {
+        border-color: #1E88E5;
+        box-shadow: 0 0 0 2px rgba(30,136,229,0.2);
+    }
+    
+    /* Enhanced Buttons */
     .stButton>button {
         width: 100%;
-        border-radius: 5px;
-        background-color: #1E88E5;
+        border-radius: 8px;
+        background: linear-gradient(45deg, #1E88E5, #1976D2);
         color: white;
+        font-weight: 500;
+        padding: 0.6rem 1.2rem;
+        border: none;
+        box-shadow: 0 4px 15px rgba(30,136,229,0.3);
+        transition: all 0.3s ease;
+    }
+    .stButton>button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(30,136,229,0.4);
+    }
+    
+    /* Enhanced Metrics */
+    .metric-card {
+        background: linear-gradient(145deg, #ffffff, #f5f7fa);
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 5px 5px 15px #d1d9e6;
+    }
+    .metric-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #1E88E5;
+    }
+    .metric-label {
+        font-size: 1.1rem;
+        color: #424242;
+        margin-top: 0.5rem;
+    }
+    
+    /* Enhanced Charts */
+    .chart-container {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -369,17 +418,26 @@ def main():
         # Top metrics
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.markdown('<div class="card" style="text-align: center;">', unsafe_allow_html=True)
-            st.metric("Total Books", stats['total_books'])
-            st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-value">{stats['total_books']}</div>
+                <div class="metric-label">Total Books</div>
+            </div>
+            """, unsafe_allow_html=True)
         with col2:
-            st.markdown('<div class="card" style="text-align: center;">', unsafe_allow_html=True)
-            st.metric("Read Books", stats['read_books'])
-            st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-value">{stats['read_books']}</div>
+                <div class="metric-label">Read Books</div>
+            </div>
+            """, unsafe_allow_html=True)
         with col3:
-            st.markdown('<div class="card" style="text-align: center;">', unsafe_allow_html=True)
-            st.metric("Percentage Read", f"{stats['percent_read']}%")
-            st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-value">{stats['percent_read']}%</div>
+                <div class="metric-label">Completion Rate</div>
+            </div>
+            """, unsafe_allow_html=True)
             
         # Charts row
         st.markdown('<h3 style="margin-top: 20px;">Reading Analytics</h3>', unsafe_allow_html=True)
@@ -387,15 +445,21 @@ def main():
         col1, col2 = st.columns(2)
         
         with col1:
-            st.markdown('<div class="card">', unsafe_allow_html=True)
+            st.markdown('<div class="chart-container">', unsafe_allow_html=True)
             # Reading status pie chart
             fig = go.Figure(data=[go.Pie(
                 labels=['Read', 'Unread'],
                 values=[stats['read_books'], stats['total_books'] - stats['read_books']],
-                hole=.4,
+                hole=.6,
                 marker_colors=['#4CAF50', '#FFC107']
             )])
-            fig.update_layout(title_text="Reading Status", showlegend=True)
+            fig.update_layout(
+                title_text="Reading Status",
+                showlegend=True,
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                title_x=0.5
+            )
             st.plotly_chart(fig, use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
             
