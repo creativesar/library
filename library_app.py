@@ -5,27 +5,58 @@ from datetime import datetime
 import plotly.express as px
 import pandas as pd
 
-# Custom styling
-st.set_page_config(page_title="Modern Library Manager", layout="wide")
+# Updated Custom styling
+st.set_page_config(page_title="Modern Library Manager", layout="wide", initial_sidebar_state="expanded")
 
-# Apply custom CSS
+# Enhanced CSS with modern styling
 st.markdown("""
     <style>
     .stApp {
         max-width: 1200px;
         margin: 0 auto;
+        background-color: #f8f9fa;
     }
     .book-card {
-        padding: 1rem;
-        border-radius: 10px;
-        background: #f8f9fa;
+        background: white;
+        padding: 1.5rem;
+        border-radius: 15px;
         margin: 1rem 0;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s ease-in-out;
+    }
+    .book-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
     }
     .stats-card {
+        background: white;
         padding: 2rem;
         border-radius: 15px;
-        background: #ffffff;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1rem;
+    }
+    .main-header {
+        padding: 2rem 0;
+        text-align: center;
+        background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
+        color: white;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+    }
+    .sidebar .stSelectbox {
+        background-color: white;
+        border-radius: 10px;
+        padding: 0.5rem;
+    }
+    .stButton button {
+        width: 100%;
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        background: #4b6cb7;
+        color: white;
+    }
+    .stButton button:hover {
+        background: #182848;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -117,38 +148,44 @@ class LibraryManager:
             self.books = []
 
 def main():
-    st.title("📚 Modern Library Manager")
+    with st.container():
+        st.markdown('<div class="main-header">', unsafe_allow_html=True)
+        st.title("📚 Modern Library Manager")
+        st.markdown('</div>', unsafe_allow_html=True)
 
-    if 'library_manager' not in st.session_state:
-        st.session_state.library_manager = LibraryManager()
-
-    menu = st.sidebar.selectbox(
-        "Menu",
-        ["📖 Add Book", "🗑️ Remove Book", "🔍 Search Books", "📚 Display All Books", "📊 Statistics"]
-    )
+    # Modernized sidebar
+    with st.sidebar:
+        st.markdown("### 📑 Navigation")
+        menu = st.selectbox(
+            "",
+            ["📖 Add Book", "🔍 Search Books", "📚 Display All Books", "📊 Statistics", "🗑️ Remove Book"]
+        )
 
     if menu == "📖 Add Book":
-        st.header("Add a New Book")
-        col1, col2 = st.columns(2)
-        
-        with st.form("add_book_form"):
+        st.markdown("### 📖 Add New Book")
+        with st.form("add_book_form", clear_on_submit=True):
+            col1, col2 = st.columns(2)
             with col1:
-                title = st.text_input("Title")
-                author = st.text_input("Author")
-                year = st.number_input("Publication Year", min_value=1000, max_value=2023, value=2023)
-                genre = st.selectbox("Genre", ["Fiction", "Non-Fiction", "Science", "Technology", "History", "Biography", "Other"])
+                title = st.text_input("📕 Title")
+                author = st.text_input("✍️ Author")
+                year = st.number_input("📅 Publication Year", min_value=1000, max_value=2023, value=2023)
+                genre = st.selectbox("📚 Genre", ["Fiction", "Non-Fiction", "Science", "Technology", "History", "Biography", "Other"])
             
             with col2:
-                cover_url = st.text_input("Cover Image URL (optional)")
-                rating = st.slider("Rating", 0, 5, 0)
-                tags = st.multiselect("Tags", ["Classic", "Bestseller", "Academic", "Self-Help", "Reference", "Novel"])
-                read = st.checkbox("Have you read this book?")
+                cover_url = st.text_input("🖼️ Cover Image URL (optional)")
+                rating = st.slider("⭐ Rating", 0, 5, 0)
+                tags = st.multiselect("🏷️ Tags", ["Classic", "Bestseller", "Academic", "Self-Help", "Reference", "Novel"])
+                read = st.checkbox("📖 Have you read this book?")
             
-            if st.form_submit_button("Add Book", use_container_width=True):
-                st.session_state.library_manager.add_book(
-                    title, author, year, genre, read, rating, cover_url, tags
-                )
-                st.success(f"Added: {title} by {author}")
+            submit = st.form_submit_button("Add Book", use_container_width=True)
+            if submit:
+                if title and author:
+                    st.session_state.library_manager.add_book(
+                        title, author, year, genre, read, rating, cover_url, tags
+                    )
+                    st.success(f"✅ Added: {title} by {author}")
+                else:
+                    st.error("❌ Title and Author are required!")
 
     elif menu == "🔍 Search Books":
         st.header("Search Books")
@@ -223,15 +260,22 @@ def main():
                 st.error("Book not found!")
 
     elif menu == "Display All Books":
-        st.header("All Books")
+        st.markdown("### 📚 Library Collection")
         books = st.session_state.library_manager.get_all_books()
         if books:
             for book in books:
-                st.write(f"📚 {book['title']} by {book['author']} ({book['year']}) - {book['genre']}")
-                st.write(f"Status: {'Read ✓' if book['read'] else 'Unread'}")
-                st.divider()
+                with st.container():
+                    st.markdown(f"""
+                    <div class="book-card">
+                        <h3>{book['title']}</h3>
+                        <p><strong>Author:</strong> {book['author']}</p>
+                        <p><strong>Year:</strong> {book['year']} | <strong>Genre:</strong> {book['genre']}</p>
+                        <p><strong>Rating:</strong> {"⭐" * book['rating']}</p>
+                        <p><strong>Status:</strong> {"📖 Read" if book['read'] else "📕 Unread"}</p>
+                    </div>
+                    """, unsafe_allow_html=True)
         else:
-            st.info("Your library is empty.")
+            st.info("📚 Your library is empty. Start by adding some books!")
 
 if __name__ == "__main__":
     main()
