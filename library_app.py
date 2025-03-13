@@ -285,6 +285,9 @@ class LibraryManager:
         except FileNotFoundError:
             self.books = []
 
+    def get_all_books(self) -> List[Dict[str, Any]]:
+        return self.books
+
 def main():
     # Create a modern header
     st.markdown('<div class="main-header">', unsafe_allow_html=True)
