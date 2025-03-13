@@ -221,8 +221,9 @@ def main():
     # Custom header with HTML
     st.markdown('<h1 class="main-header">📚 Modern Library Manager</h1>', unsafe_allow_html=True)
 
-    if 'library_manager' not in st.session_state:
-        st.session_state.library_manager = LibraryManager()
+    # Remove this duplicate initialization block
+    # if 'library_manager' not in st.session_state:
+    #     st.session_state.library_manager = LibraryManager()
 
     # Sidebar with gradient background
     with st.sidebar:
